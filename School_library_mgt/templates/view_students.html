@@ -1,0 +1,16 @@
+<!-- templates/view_students.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Students List</title>
+</head>
+<body>
+    <h1>All Students</h1>
+    <ul>
+        {% for student in students %}
+        <li>{{ student.FirstName }} {{ student.LastName }} - {{ student.Email }} ({{ student.RegistrationNumber }})</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>
