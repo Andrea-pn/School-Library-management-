@@ -348,35 +348,37 @@
             </div>
             
             <!-- Dashboard Cards -->
-            <div class="dashboard-cards">
-                <div class="card">
-                    <div class="card-icon">📚</div>
-                    <div class="card-title">Total Books</div>
-                    <div class="card-value">1,254</div>
-                    <div class="card-subtitle">42 added this month</div>
+            <!-- Dashboard Cards -->
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-icon">📚</div>
+                        <div class="card-title">Total Books</div>
+                        <div class="card-value">{{ book_stats.total }}</div>
+                        <div class="card-subtitle">{{ book_stats.added_this_month }} added this month</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-icon">👨‍🎓</div>
+                        <div class="card-title">Students</div>
+                        <div class="card-value">{{ student_stats.total }}</div>
+                        <div class="card-subtitle">{{ student_stats.new_registrations }} new registrations</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-icon">📤</div>
+                        <div class="card-title">Books Borrowed</div>
+                        <div class="card-value">{{ borrow_stats.total }}</div>
+                        <div class="card-subtitle">{{ borrow_stats.this_week }} this week</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-icon">⏰</div>
+                        <div class="card-title">Overdue Books</div>
+                        <div class="card-value">{{ overdue_stats.total }}</div>
+                        <div class="card-subtitle">{{ overdue_stats.due_today }} due today</div>
+                    </div>
                 </div>
-                
-                <div class="card">
-                    <div class="card-icon">👨‍🎓</div>
-                    <div class="card-title">Students</div>
-                    <div class="card-value">879</div>
-                    <div class="card-subtitle">15 new registrations</div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-icon">📤</div>
-                    <div class="card-title">Books Borrowed</div>
-                    <div class="card-value">248</div>
-                    <div class="card-subtitle">36 this week</div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-icon">⏰</div>
-                    <div class="card-title">Overdue Books</div>
-                    <div class="card-value">12</div>
-                    <div class="card-subtitle">3 due today</div>
-                </div>
-            </div>
+
             
             <!-- Quick Actions Section -->
             <div class="quick-access">
