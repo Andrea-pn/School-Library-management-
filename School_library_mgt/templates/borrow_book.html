@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Borrow Book</title>
+</head>
+<body>
+    <h1>Borrow Book</h1>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <label>Student:</label>
+        <select name="student_id">
+            {% for student in students %}
+                <option value="{{ student.StudentID }}">{{ student.StudentName }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label>Book:</label>
+        <select name="book_id">
+            {% for book in available_books %}
+                <option value="{{ book.BookID }}">{{ book.BookName }} ({{ book.Quantity }} available)</option>
+            {% endfor %}
+        </select><br>
+
+        <label>Borrow Date:</label>
+        <input type="date" name="borrow_date"><br>
+
+        <button type="submit">Borrow</button>
+    </form>
+
+    <a href="/">Go Back</a>
+</body>
+</html>

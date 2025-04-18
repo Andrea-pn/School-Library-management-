@@ -1,0 +1,18 @@
+<!-- templates/view_staff.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff Members</title>
+</head>
+<body>
+    <h1>All Staff</h1>
+    <ul>
+        {% for staff_member in staff %}
+        <li>{{ staff_member.Name }} - {{ staff_member.Role }} ({{ staff_member.Email }})</li>
+        {% else %}
+        <li>No staff available</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>
