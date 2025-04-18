@@ -298,18 +298,22 @@
                         Students
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="/borrow_book" class="nav-link">
+                
+                <li>
+                    <a href="{{ url_for('borrowed_books') }}" class="nav-link">
                         <span class="icon">📤</span>
-                        Lending
+                        Borrowed Books
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a href="/return_book" class="nav-link">
+                    <a href="{{ url_for('return_view') }}" class="nav-link">
+
                         <span class="icon">📥</span>
                         Returns
                     </a>
                 </li>
+                
             </ul>
             
             <div class="menu-category">Administration</div>
