@@ -863,6 +863,53 @@ def export_csv():
         # If error, return to reports page with error message
         flash(f"Error exporting data: {str(e)}", "error")
         return redirect(url_for('reports'))
+    
+@app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    if request.method == 'POST':
+        title = request.form['title']
+        author = request.form['author']
+        genre = request.form['genre']
+        published_year = int(request.form['published_year'])
+        quantity = int(request.form['quantity'])
+        
+        cursor.execute("""
+            UPDATE Books 
+            SET Title = %s, Author = %s, Genre = %s, PublishedYear = %s, Quantity = %s
+            WHERE BookID = %s
+        """, (title, author, genre, published_year, quantity, book_id))
+        conn.commit()
+        return redirect(url_for('view_books'))
+    
+    cursor.execute("SELECT * FROM Books WHERE BookID = %s", (book_id,))
+    book = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    return render_template('edit_book.html', book=book)
+
+@app.route('/delete_book/<int:book_id>')
+def delete_book(book_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if book is currently borrowed
+    cursor.execute("SELECT COUNT(*) FROM Borrowing WHERE BookID = %s AND Returned = FALSE", (book_id,))
+    count = cursor.fetchone()[0]
+    
+    if count > 0:
+        # Book is currently borrowed
+        return "Cannot delete book because it is currently borrowed."
+    else:
+        cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id,))
+        conn.commit()
+    
+    cursor.close()
+    conn.close()
+    return redirect(url_for('view_books'))
 
 
 if __name__ == '__main__':
