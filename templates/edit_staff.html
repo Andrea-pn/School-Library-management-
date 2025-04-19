@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Staff</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #e2ebf0, #dfe9f3);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-top: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #28a745;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #28a745;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Edit Staff Member</h2>
+        <form method="POST" action="{{ url_for('edit_staff', staff_id=staff.staff_id) }}">
+            <input type="text" name="first_name" value="{{ staff.first_name }}" required>
+            <input type="text" name="last_name" value="{{ staff.last_name }}" required>
+            <input type="text" name="phone_number" value="{{ staff.phone_number }}" required>
+            <input type="email" name="email" value="{{ staff.email }}" required>
+            <input type="text" name="role" value="{{ staff.role }}" required>
+            <button type="submit">Update Staff</button>
+        </form>
+    </div>
+</body>
+</html>
