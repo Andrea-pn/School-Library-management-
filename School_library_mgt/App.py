@@ -12,7 +12,7 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
-    'password': '343434',  # Replace with your MySQL password
+    'password': 'meshack003',  # Replace with your MySQL password
     'database': 'SchoolLibrary'
 }
 
@@ -43,6 +43,24 @@ def create_tables():
             Genre VARCHAR(100),
             PublishedYear INT,
             Quantity INT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS borrowed_books (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_name VARCHAR(100) NOT NULL,
+            book_title VARCHAR(200) NOT NULL,
+            borrow_date DATE NOT NULL,
+            return_date DATE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS returns (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_name VARCHAR(100) NOT NULL,
+            book_title VARCHAR(200) NOT NULL,
+            borrow_date DATE NOT NULL,
+            return_date DATE
         )
     """)
 
@@ -81,6 +99,17 @@ def create_tables():
     conn.commit()
     cursor.close()
     conn.close()
+@app.route('/borrowed-books')
+def borrowed_books():
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM borrowed_books")
+    borrowed = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return render_template('borrowed_books.html', borrowed_books=borrowed)
 
 @app.route('/')
 def home():
@@ -375,6 +404,56 @@ def return_book():
                           borrows=active_borrows, 
                           message=message, 
                           fine_amount=fine_amount)
+@app.route('/return_simple/<int:book_id>', methods=['POST'])
+def return_simple(book_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    from datetime import date
+    cursor.execute("""
+        UPDATE borrowed_books
+        SET return_date = %s
+        WHERE id = %s
+    """, (date.today(), book_id))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('return_view'))  # Or borrowed_books view
+
+@app.route('/returns')
+def return_view():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT b.BorrowID, 
+               CONCAT(s.FirstName, ' ', s.LastName) as StudentName, 
+               bk.Title as BookTitle,
+               b.BorrowDate, 
+               b.ReturnDate as DueDate
+        FROM Borrowing b
+        JOIN Students s ON b.StudentID = s.StudentID
+        JOIN Books bk ON b.BookID = bk.BookID
+        WHERE b.Returned = FALSE
+    """)
+    borrowed_books = cursor.fetchall()
+
+    # Calculate overdue days
+    for book in borrowed_books:
+        # Convert string dates to datetime objects
+        borrow_date = datetime.strptime(book['BorrowDate'], '%Y-%m-%d')  # Adjust format if needed
+        due_date = datetime.strptime(book['DueDate'], '%Y-%m-%d')  # Adjust format if needed
+        
+        # Calculate overdue days (if any)
+        overdue_days = (datetime.now() - due_date).days  # You can also compare with the borrow date if needed
+        book['overdue_days'] = overdue_days  # Add the overdue days to the book entry
+
+    cursor.close()
+    conn.close()
+
+    return render_template('returns.html', borrowed_books=borrowed_books)
 
 # --- Staff Routes ---
 @app.route('/view_staff')
