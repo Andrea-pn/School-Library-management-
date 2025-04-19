@@ -12,7 +12,7 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
-    'password': '343434',  # Replace with your MySQL password
+    'password': 'precious',  # Replace with your MySQL password
     'database': 'SchoolLibrary'
 }
 
@@ -890,26 +890,38 @@ def edit_book(book_id):
     conn.close()
     
     return render_template('edit_book.html', book=book)
-
-@app.route('/delete_book/<int:book_id>')
+@app.route('/delete_book/<int:book_id>', methods=['GET', 'POST'])
 def delete_book(book_id):
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     
-    # Check if book is currently borrowed
-    cursor.execute("SELECT COUNT(*) FROM Borrowing WHERE BookID = %s AND Returned = FALSE", (book_id,))
-    count = cursor.fetchone()[0]
+    # First get the book details
+    cursor.execute("SELECT * FROM Books WHERE BookID = %s", (book_id,))
+    book = cursor.fetchone()
     
-    if count > 0:
-        # Book is currently borrowed
-        return "Cannot delete book because it is currently borrowed."
-    else:
-        cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id,))
-        conn.commit()
+    if request.method == 'POST':
+        try:
+            # Option 1: Delete related records first (if that's what you want)
+            # cursor.execute("DELETE FROM borrowedbooks WHERE BookID = %s", (book_id,))
+            # conn.commit()
+            
+            # Then delete the book
+            cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return redirect(url_for('view_books'))
+            
+        except mysql.connector.errors.IntegrityError:
+            # Option 2: Show an error message
+            cursor.close()
+            conn.close()
+            error_message = "Cannot delete this book because it has borrowing records. You need to delete those records first or return all borrowed copies."
+            return render_template('delete_book.html', book=book, error_message=error_message)
     
     cursor.close()
     conn.close()
-    return redirect(url_for('view_books'))
+    return render_template('delete_book.html', book=book)
 
 
 if __name__ == '__main__':
