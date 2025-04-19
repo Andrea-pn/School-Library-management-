@@ -3,6 +3,7 @@ import mysql.connector
 from datetime import date, timedelta
 import io
 import csv
+from datetime import datetime
 from datetime import date, timedelta
 from flask import make_response, request, jsonify, flash, redirect, url_for
 
@@ -12,7 +13,7 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
-    'password': 'meshack003',  # Replace with your MySQL password
+    'password': '343434',  # Replace with your MySQL password
     'database': 'SchoolLibrary'
 }
 
