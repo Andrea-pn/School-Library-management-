@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Book</title>
+</head>
+<body>
+    <h1>Add New Book</h1>
+    
+    {% if message %}
+        <p style="color: green;">{{ message }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <label>Title:</label><input name="title"><br>
+        <label>Author:</label><input name="author"><br>
+        <label>Genre:</label><input name="genre"><br>
+        <label>Year:</label><input name="published_year" type="number" placeholder="e.g. 1960"><br>
+        <label>Quantity:</label><input name="quantity"><br>
+        <button type="submit">Add Book</button>
+    </form>
+    <a href="/">Go Back</a>
+</body>
+</html>
