@@ -12,7 +12,10 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
-    'password': 'Bloom123@fidey',  # Replace with your MySQL password
+
+    'password': 'precious',  # Replace with your MySQL password
+
+
     'database': 'SchoolLibrary'
 }
 
@@ -1012,6 +1015,65 @@ def export_csv():
         # If error, return to reports page with error message
         flash(f"Error exporting data: {str(e)}", "error")
         return redirect(url_for('reports'))
+    
+@app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    if request.method == 'POST':
+        title = request.form['title']
+        author = request.form['author']
+        genre = request.form['genre']
+        published_year = int(request.form['published_year'])
+        quantity = int(request.form['quantity'])
+        
+        cursor.execute("""
+            UPDATE Books 
+            SET Title = %s, Author = %s, Genre = %s, PublishedYear = %s, Quantity = %s
+            WHERE BookID = %s
+        """, (title, author, genre, published_year, quantity, book_id))
+        conn.commit()
+        return redirect(url_for('view_books'))
+    
+    cursor.execute("SELECT * FROM Books WHERE BookID = %s", (book_id,))
+    book = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    return render_template('edit_book.html', book=book)
+@app.route('/delete_book/<int:book_id>', methods=['GET', 'POST'])
+def delete_book(book_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # First get the book details
+    cursor.execute("SELECT * FROM Books WHERE BookID = %s", (book_id,))
+    book = cursor.fetchone()
+    
+    if request.method == 'POST':
+        try:
+            # Option 1: Delete related records first (if that's what you want)
+            # cursor.execute("DELETE FROM borrowedbooks WHERE BookID = %s", (book_id,))
+            # conn.commit()
+            
+            # Then delete the book
+            cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return redirect(url_for('view_books'))
+            
+        except mysql.connector.errors.IntegrityError:
+            # Option 2: Show an error message
+            cursor.close()
+            conn.close()
+            error_message = "Cannot delete this book because it has borrowing records. You need to delete those records first or return all borrowed copies."
+            return render_template('delete_book.html', book=book, error_message=error_message)
+    
+    cursor.close()
+    conn.close()
+    return render_template('delete_book.html', book=book)
 
 
 if __name__ == '__main__':
