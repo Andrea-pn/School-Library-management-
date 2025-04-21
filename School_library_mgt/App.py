@@ -232,53 +232,23 @@ def add_student():
     
     return render_template('add_student.html', message=message)
 
-# --- Book Routes ---
-@app.route('/books')
-def view_books():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Books")
-    books = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('view_books.html', books=books)
 
-@app.route('/add_book', methods=['GET', 'POST'])
-def add_book():
-    message = ""
-    if request.method == 'POST':
-        # 1. Get form data
-        title = request.form['title']
-        author = request.form['author']
-        genre = request.form['genre']
-        published_year = request.form['published_year']
-        quantity = request.form['quantity']
 
-        print(f"Title: {title}, Author: {author}, Genre: {genre}, Published Year: {published_year}, Quantity: {quantity}")  # Debugging
-
-        # 2. Validate year and quantity as integers
-        try:
-            published_year = int(published_year)
-            quantity = int(quantity)
-        except ValueError:
-            message = "Year and Quantity must be valid numbers."
-            return render_template('add_book.html', message=message)
 
         # 3. Insert into the database
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        try:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
             cursor.execute("INSERT INTO Books (Title, Author, Genre, PublishedYear, Quantity) VALUES (%s, %s, %s, %s, %s)",
                         (title, author, genre, published_year, quantity))
             conn.commit()
             message = "Book added successfully!"
-        except mysql.connector.Error as err:
+    except mysql.connector.Error as err:
             message = f"Error: {err}"
             print(f"Error: {err}")  # Debugging
-        finally:
+    finally:
             cursor.close()
             conn.close()
-    return render_template('add_book.html', message=message)
 
 @app.route('/borrow_book', methods=['GET', 'POST'])
 def borrow_book():
