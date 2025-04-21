@@ -12,10 +12,14 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
+<<<<<<< HEAD
+    'password': 'Bloom123@fidey',  # Replace with your MySQL password
+=======
 
     'password': 'precious',  # Replace with your MySQL password
 
 
+>>>>>>> origin/main
     'database': 'SchoolLibrary'
 }
 
@@ -1015,6 +1019,8 @@ def export_csv():
         # If error, return to reports page with error message
         flash(f"Error exporting data: {str(e)}", "error")
         return redirect(url_for('reports'))
+<<<<<<< HEAD
+=======
     
 @app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -1074,6 +1080,7 @@ def delete_book(book_id):
     cursor.close()
     conn.close()
     return render_template('delete_book.html', book=book)
+>>>>>>> origin/main
 
 
 if __name__ == '__main__':

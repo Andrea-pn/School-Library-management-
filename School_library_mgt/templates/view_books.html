@@ -1,3 +1,21 @@
+<<<<<<< HEAD
+<!-- templates/view_books.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Books List</title>
+</head>
+<body>
+    <h1>All Books</h1>
+    <ul>
+        {% for book in books %}
+        <li>{{ book.Title }} by {{ book.Author }} ({{ book.Genre }}, {{ book.PublishedYear }}) - Quantity: {{ book.Quantity }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>
+=======
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -481,3 +499,4 @@
     </script>
 </body>
 </html>
+>>>>>>> origin/main
