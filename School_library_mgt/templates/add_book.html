@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<<<<<<< HEAD
     <title>Add Book</title>
 </head>
 <body>
@@ -21,3 +22,602 @@
     <a href="/">Go Back</a>
 </body>
 </html>
+=======
+    <title>Add Book - Library MS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #2EC4B6;
+            --accent: #FF9F1C;
+            --danger: #e74c3c;
+            --success: #10b981;
+            --warning: #ff9f1c;
+            --info: #3498db;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --text-primary: #334155;
+            --text-secondary: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --sidebar-bg: #2c3e50;
+            --sidebar-hover: rgba(255, 255, 255, 0.1);
+            --sidebar-active: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            display: flex;
+            background-color: #f0f4f8;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .logo-container {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .logo-icon {
+            background-color: white;
+            border-radius: 8px;
+            padding: 6px;
+            color: var(--primary);
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .menu-header {
+            padding: 20px 20px 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 0 30px 30px 0;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--sidebar-hover);
+            transform: translateX(5px);
+        }
+        
+        .menu-item.active {
+            background-color: var(--sidebar-active);
+            box-shadow: var(--shadow-sm);
+            font-weight: 500;
+        }
+        
+        .menu-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            margin-right: 12px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        
+        .content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--dark);
+            position: relative;
+        }
+        
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-left: 48px;
+            border-radius: 50px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background-color: white;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3), var(--shadow-sm);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .form-header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            color: white;
+            background: var(--primary);
+        }
+        
+        .form-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .success-message {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .success-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            outline: none;
+        }
+        
+        .form-input::placeholder {
+            color: #a0aec0;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f8fafc;
+        }
+        
+        .preview-container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+        }
+        
+        .preview-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .preview-header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            color: white;
+            background: var(--accent);
+        }
+        
+        .preview-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .book-preview {
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .book-preview-cover {
+            background-color: var(--primary);
+            border-radius: 8px;
+            height: 180px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .book-preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+        
+        .book-preview-author {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .book-preview-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .book-preview-genre {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            background-color: #eef2ff;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .book-preview-year {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding: 20px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        /* JavaScript for live preview */
+        #bookPreviewTitle,
+        #bookPreviewAuthor,
+        #bookPreviewGenre,
+        #bookPreviewYear,
+        #searchInput {
+            transition: all 0.3s;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Live preview functionality
+            const titleInput = document.getElementById('title');
+            const authorInput = document.getElementById('author');
+            const genreInput = document.getElementById('genre');
+            const yearInput = document.getElementById('published_year');
+            
+            const bookPreviewTitle = document.getElementById('bookPreviewTitle');
+            const bookPreviewAuthor = document.getElementById('bookPreviewAuthor');
+            const bookPreviewGenre = document.getElementById('bookPreviewGenre');
+            const bookPreviewYear = document.getElementById('bookPreviewYear');
+            
+            titleInput.addEventListener('input', function() {
+                bookPreviewTitle.textContent = this.value || 'Book Title';
+            });
+            
+            authorInput.addEventListener('input', function() {
+                bookPreviewAuthor.textContent = this.value ? 'by ' + this.value : 'by Author';
+            });
+            
+            genreInput.addEventListener('input', function() {
+                bookPreviewGenre.textContent = this.value || 'Genre';
+            });
+            
+            yearInput.addEventListener('input', function() {
+                bookPreviewYear.textContent = this.value || 'Year';
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                // In a real app, you would send this to the server or search in client-side data
+                console.log('Searching for:', query);
+                // For demonstration, we'll just show an alert
+                if (query.length > 2) {
+                    alert('Search functionality would query the server for: ' + query);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-container">
+            <a href="/" class="logo">
+                <span class="logo-icon">📚</span>
+                Library MS
+            </a>
+        </div>
+        
+        <div class="menu-header">MAIN MENU</div>
+        
+        <a href="/" class="menu-item">
+            <div class="menu-icon">📊</div>
+            Dashboard
+        </a>
+        
+        <a href="/books" class="menu-item active">
+            <div class="menu-icon">📚</div>
+            Books
+        </a>
+        
+        <a href="/students" class="menu-item">
+            <div class="menu-icon">👨‍🎓</div>
+            Students
+        </a>
+        
+        <a href="/lending" class="menu-item">
+            <div class="menu-icon">📖</div>
+            Lending
+        </a>
+        
+        <a href="/returns" class="menu-item">
+            <div class="menu-icon">📚</div>
+            Returns
+        </a>
+        
+        <div class="menu-header">ADMINISTRATION</div>
+        
+        <a href="/view_staff" class="menu-item">
+            <div class="menu-icon">👥</div>
+            Staff
+        </a>
+        
+        <a href="/reports" class="menu-item">
+            <div class="menu-icon">📄</div>
+            Reports
+        </a>
+    </div>
+    
+    <div class="content">
+        <div class="header">
+            <h1>Add New Book</h1>
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search books, authors...">
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-header">
+                <div class="form-header-icon">📘</div>
+                <div class="form-title">Book Information</div>
+            </div>
+            
+            {% if message %}
+            <div class="success-message">
+                <span class="success-icon">✅</span>
+                {{ message }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" id="addBookForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="title" name="title" class="form-input" placeholder="Enter book title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Author</label>
+                        <input type="text" id="author" name="author" class="form-input" placeholder="Enter author name" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Genre</label>
+                        <input type="text" id="genre" name="genre" class="form-input" placeholder="Enter book genre" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Published Year</label>
+                        <input type="number" id="published_year" name="published_year" class="form-input" placeholder="e.g. 1960" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" class="form-input" placeholder="Enter quantity" required>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="/books" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Add Book</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="preview-container">
+            <div class="preview-header">
+                <div class="preview-header-icon">👁</div>
+                <div class="preview-title">Book Preview</div>
+            </div>
+            
+            <div class="book-preview">
+                <div class="book-preview-cover">📖</div>
+                <div class="book-preview-title" id="bookPreviewTitle">Book Title</div>
+                <div class="book-preview-author" id="bookPreviewAuthor">by Author</div>
+                <div class="book-preview-meta">
+                    <span class="book-preview-genre" id="bookPreviewGenre">Genre</span>
+                    <span class="book-preview-year" id="bookPreviewYear">Year</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div>© 2025 Library Management System. All rights reserved.</div>
+            <div>Version 2.0.4</div>
+        </div>
+    </div>
+</body>
+</html>
+>>>>>>> origin/main
