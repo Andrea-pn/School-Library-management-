@@ -12,7 +12,10 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
+
     'password': 'precious',  # Replace with your MySQL password
+
+
     'database': 'SchoolLibrary'
 }
 
@@ -43,6 +46,24 @@ def create_tables():
             Genre VARCHAR(100),
             PublishedYear INT,
             Quantity INT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS borrowed_books (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_name VARCHAR(100) NOT NULL,
+            book_title VARCHAR(200) NOT NULL,
+            borrow_date DATE NOT NULL,
+            return_date DATE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS returns (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_name VARCHAR(100) NOT NULL,
+            book_title VARCHAR(200) NOT NULL,
+            borrow_date DATE NOT NULL,
+            return_date DATE
         )
     """)
 
@@ -81,6 +102,17 @@ def create_tables():
     conn.commit()
     cursor.close()
     conn.close()
+@app.route('/borrowed-books')
+def borrowed_books():
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM borrowed_books")
+    borrowed = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return render_template('borrowed_books.html', borrowed_books=borrowed)
 
 @app.route('/')
 def home():
@@ -375,45 +407,165 @@ def return_book():
                           borrows=active_borrows, 
                           message=message, 
                           fine_amount=fine_amount)
+@app.route('/return_simple/<int:book_id>', methods=['POST'])
+def return_simple(book_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-# --- Staff Routes ---
+    from datetime import date
+    cursor.execute("""
+        UPDATE borrowed_books
+        SET return_date = %s
+        WHERE id = %s
+    """, (date.today(), book_id))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('return_view'))  # Or borrowed_books view
+
+@app.route('/returns')
+def return_view():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT b.BorrowID, 
+               CONCAT(s.FirstName, ' ', s.LastName) as StudentName, 
+               bk.Title as BookTitle,
+               b.BorrowDate, 
+               b.ReturnDate as DueDate
+        FROM Borrowing b
+        JOIN Students s ON b.StudentID = s.StudentID
+        JOIN Books bk ON b.BookID = bk.BookID
+        WHERE b.Returned = FALSE
+    """)
+    borrowed_books = cursor.fetchall()
+
+    # Calculate overdue days
+    for book in borrowed_books:
+        # Convert string dates to datetime objects
+        borrow_date = datetime.strptime(book['BorrowDate'], '%Y-%m-%d')  # Adjust format if needed
+        due_date = datetime.strptime(book['DueDate'], '%Y-%m-%d')  # Adjust format if needed
+        
+        # Calculate overdue days (if any)
+        overdue_days = (datetime.now() - due_date).days  # You can also compare with the borrow date if needed
+        book['overdue_days'] = overdue_days  # Add the overdue days to the book entry
+
+    cursor.close()
+    conn.close()
+
+    return render_template('returns.html', borrowed_books=borrowed_books)
+
+
+  
+
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Tstaff")
+    staff_list = cursor.fetchall()
+    conn.close()
+    print("--- Staff Data from / route ---")
+    for staff_member in staff_list:
+        print(staff_member)
+    print("--- End of Staff Data ---")
+    return render_template('staff.html', staff=staff_list)
+
+from flask import redirect, url_for, render_template, flash
+
+@app.route('/add_staff', methods=['GET', 'POST'])
+def add_staff():
+    if request.method == 'POST':
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        phone_number = request.form['phone_number']
+        email = request.form['email']
+        role = request.form['role']
+        
+        # Add the staff to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Tstaff (first_name, last_name, phone_number, email, role) VALUES (%s, %s, %s, %s, %s)",
+                       (first_name, last_name, phone_number, email, role))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Pass success message to the template
+        return render_template('add_staff.html', success_message="Tstaff member added successfully!")
+    
+    return render_template('add_staff.html')
+
+
+@app.route('/edit/<int:staff_id>', methods=['GET', 'POST'])
+def edit_staff(staff_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'GET':
+        cursor.execute("SELECT * FROM Tstaff WHERE staff_id = %s", (staff_id,))
+        staff_member = cursor.fetchone()
+        conn.close()
+        if staff_member:
+            return render_template('edit_staff.html', staff=staff_member)
+        else:
+            return redirect(url_for('view_staff'))
+
+    elif request.method == 'POST':
+        first = request.form['first_name']
+        last = request.form['last_name']
+        phone = request.form['phone_number']
+        email = request.form['email']
+        role = request.form['role']
+
+        cursor.execute("""
+            UPDATE Tstaff
+            SET first_name=%s, last_name=%s, phone_number=%s, email=%s, role=%s
+            WHERE staff_id=%s
+        """, (first, last, phone, email, role, staff_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_staff'))
+
+@app.route('/delete/<int:staff_id>')
+def delete_staff(staff_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Tstaff WHERE staff_id=%s", (staff_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('view_staff'))
+
+
 @app.route('/view_staff')
 def view_staff():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Staff")
-    staff = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Tstaff")
+    staff_list = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
-    # Debugging: Check the staff data
-    print("Staff data:", staff)
+    return render_template('view_staff.html', staff=staff_list)
 
-    return render_template('view_staff.html', staff=staff)
+# Example dashboard route
+@app.route('/')
+def dashboard():
+    return '''
+        <div style="text-align:center; padding:30px;">
+            <h1>Welcome to the Dashboard</h1>
+            <a href="/view_staff" style="padding:10px 20px; background:#007bff; color:white; text-decoration:none; border-radius:5px;">
+                View Staff
+            </a>
+        </div>
+    '''
 
 
-@app.route('/add_staff', methods=['GET', 'POST'])
-def add_staff():
-    message = ""
-    if request.method == 'POST':
-        name = request.form['name']
-        role = request.form['role']
-        email = request.form['email']
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("INSERT INTO Staff (Name, Role, Email) VALUES (%s, %s, %s)",
-                        (name, role, email))
-            conn.commit()
-            message = "Staff member added successfully!"
-        except mysql.connector.Error as err:
-            message = f"Error: {err}"
-        finally:
-            cursor.close()
-            conn.close()
-    
-    return render_template('add_staff.html', message=message)
 
 # --- API Routes (Keep these for potential future use) ---
 @app.route('/api/students', methods=['POST'])

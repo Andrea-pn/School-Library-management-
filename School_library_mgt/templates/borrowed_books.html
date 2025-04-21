@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Borrowed Books - School Library</title>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #f5f7fa, #c3cfe2, #a8c0ff, #3f2b96);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+            animation: fadeIn 1s ease-out;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        .search-box {
+            flex-grow: 1;
+            max-width: 500px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.9);
+            padding-right: 50px;
+        }
+        .search-box input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
+        }
+        .search-box button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #3498db;
+            padding: 10px;
+        }
+        .filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .filters select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.9);
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3e%3cpath fill='none' d='M0 0h24v24H0z'/%3e%3cpath d='M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z' fill='%233498db'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 35px;
+        }
+        .filters select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-out;
+        }
+        table th, table td {
+            padding: 18px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table th {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #2c3e50;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        table tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85em;
+            display: inline-block;
+            text-align: center;
+        }
+        .status-borrowed {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #2980b9;
+        }
+        .status-overdue {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #c0392b;
+        }
+        .action-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        .action-btn.return {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+        .action-btn.renew {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            animation: fadeIn 1.2s ease-out;
+        }
+        .pagination button {
+            background: white;
+            border: 2px solid #3498db;
+            color: #3498db;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .pagination button:hover {
+            background: #3498db;
+            color: white;
+        }
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            font-size: 1.1em;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            transform: translateX(-5px);
+        }
+        .back-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #3498db;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s;
+        }
+        .back-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        .stats-cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .stats-card {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-card.overdue {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        .stats-card.due-today {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+        .stats-card h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .stats-card p {
+            font-size: 2em;
+            margin: 0;
+            font-weight: 700;
+        }
+        .responsive-table {
+            overflow-x: auto;
+            max-width: 100%;
+            border-radius: 12px;
+        }
+        @media (max-width: 768px) {
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            .search-box {
+                max-width: 100%;
+            }
+            .stats-cards {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <!-- Added font awesome icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Borrowed Books</h1>
+        
+        <div class="stats-cards">
+            <div class="stats-card">
+                <h3>Total Borrowed</h3>
+                <p>{{ total_borrowed }}</p>
+            </div>
+            <div class="stats-card overdue">
+                <h3>Overdue</h3>
+                <p>{{ overdue_count }}</p>
+            </div>
+            <div class="stats-card due-today">
+                <h3>Due Today</h3>
+                <p>{{ due_today }}</p>
+            </div>
+        </div>
+        
+        <div class="header-controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by book title, student name, or ID...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="filters">
+                <select id="statusFilter">
+                    <option value="all">All Status</option>
+                    <option value="borrowed">Borrowed</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+                <select id="sortBy">
+                    <option value="due_date">Sort by Due Date</option>
+                    <option value="borrow_date">Sort by Borrow Date</option>
+                    <option value="student">Sort by Student</option>
+                    <option value="book">Sort by Book Title</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="responsive-table">
+            <table id="borrowedBooksTable">
+                <thead>
+                    <tr>
+                        <th>Loan ID</th>
+                        <th>Student</th>
+                        <th>Book</th>
+                        <th>Borrowed On</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ loan.loan_id }}</td>
+                        <td>{{ loan.student_name }}</td>
+                        <td>{{ loan.book_title }}</td>
+                        <td>{{ loan.issue_date }}</td>
+                        <td>{{ loan.due_date }}</td>
+                        <td>
+                            {% if loan.is_overdue %}
+                            <span class="status status-overdue">Overdue</span>
+                            {% else %}
+                            <span class="status status-borrowed">Borrowed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/return_book?loan_id={{ loan.loan_id }}" class="action-btn return">Return</a>
+                            {% if not loan.is_overdue %}
+                            <a href="/renew_loan?loan_id={{ loan.loan_id }}" class="action-btn renew">Renew</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination">
+            <button>&laquo;</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>&raquo;</button>
+        </div>
+        
+        <a href="/" class="back-link">← Back to Dashboard</a>
+    </div>
+    
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const table = document.getElementById('borrowedBooksTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const rowData = rows[i].textContent.toLowerCase();
+                if (rowData.includes(searchTerm)) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        });
+        
+        // Status filter
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const filter = this.value;
+            const table = document.getElementById('borrowedBooksTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const statusCell = rows[i].getElementsByTagName('td')[5];
+                const status = statusCell.textContent.trim().toLowerCase();
+                
+                if (filter === 'all' || status.includes(filter)) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        });
+        
+        // Sorting functionality - basic implementation
+        document.getElementById('sortBy').addEventListener('change', function() {
+            const sortBy = this.value;
+            const table = document.getElementById('borrowedBooksTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Column index mapping
+            const columnMap = {
+                'student': 1,
+                'book': 2,
+                'borrow_date': 3,
+                'due_date': 4
+            };
+            
+            rows.sort((a, b) => {
+                const columnIndex = columnMap[sortBy];
+                const aValue = a.cells[columnIndex].textContent.trim();
+                const bValue = b.cells[columnIndex].textContent.trim();
+                
+                if (sortBy === 'borrow_date' || sortBy === 'due_date') {
+                    // Date comparison
+                    return new Date(aValue) - new Date(bValue);
+                } else {
+                    // Text comparison
+                    return aValue.localeCompare(bValue);
+                }
+            });
+            
+            // Clear tbody and append sorted rows
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
+            
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    </script>
+</body>
+</html>
