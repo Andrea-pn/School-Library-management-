@@ -3,6 +3,7 @@ import mysql.connector
 from datetime import date, datetime, timedelta
 import io
 import csv
+from datetime import datetime
 from datetime import date, timedelta
 from flask import make_response, request, jsonify, flash, redirect, url_for
 
@@ -12,14 +13,16 @@ app = Flask(__name__)
 db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
-<<<<<<< HEAD
+
+    'password': '343434',  # Replace with your MySQL password
+
     'password': 'Bloom123@fidey',  # Replace with your MySQL password
-=======
+
 
     'password': 'meshack003',  # Replace with your MySQL password
 
 
->>>>>>> origin/main
+
     'database': 'SchoolLibrary'
 }
 
@@ -125,6 +128,7 @@ def borrowed_books():
     JOIN Students s ON bo.StudentID = s.StudentID
     JOIN Books b ON bo.BookID = b.BookID
 """)
+
 
 
     borrowed_books = cursor.fetchall()
@@ -419,6 +423,7 @@ def return_simple(book_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
+
     from datetime import date
     cursor.execute("""
         UPDATE borrowed_books
@@ -466,7 +471,20 @@ def return_view():
     return render_template('returns.html', borrowed_books=borrowed_books)
 
 
-  
+    from datetime import date
+    cursor.execute("""
+        UPDATE borrowed_books
+        SET return_date = %s
+        WHERE id = %s
+    """, (date.today(), book_id))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('return_view'))  # Or borrowed_books view
+
+
 
 @app.route('/')
 def index():
@@ -1022,8 +1040,7 @@ def export_csv():
         # If error, return to reports page with error message
         flash(f"Error exporting data: {str(e)}", "error")
         return redirect(url_for('reports'))
-<<<<<<< HEAD
-=======
+
     
 @app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -1083,7 +1100,7 @@ def delete_book(book_id):
     cursor.close()
     conn.close()
     return render_template('delete_book.html', book=book)
->>>>>>> origin/main
+
 
 
 if __name__ == '__main__':
