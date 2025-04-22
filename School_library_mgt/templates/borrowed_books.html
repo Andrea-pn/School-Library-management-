@@ -367,28 +367,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for loan in loans %}
-                    <tr>
-                        <td>{{ loan.loan_id }}</td>
-                        <td>{{ loan.student_name }}</td>
-                        <td>{{ loan.book_title }}</td>
-                        <td>{{ loan.issue_date }}</td>
-                        <td>{{ loan.due_date }}</td>
-                        <td>
-                            {% if loan.is_overdue %}
-                            <span class="status status-overdue">Overdue</span>
-                            {% else %}
-                            <span class="status status-borrowed">Borrowed</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="/return_book?loan_id={{ loan.loan_id }}" class="action-btn return">Return</a>
-                            {% if not loan.is_overdue %}
-                            <a href="/renew_loan?loan_id={{ loan.loan_id }}" class="action-btn renew">Renew</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% for book in borrowed_books %}
+<tr>
+    <td>{{ book.loan_id }}</td>
+    <td>{{ book.student_name }}</td>
+    <td>{{ book.book_title }}</td>
+    <td>{{ book.issue_date }}</td>
+    <td>{{ book.due_date }}</td>
+    <td>
+        {% if book.is_overdue %}
+        <span class="status status-overdue">Overdue</span>
+        {% else %}
+        <span class="status status-borrowed">Borrowed</span>
+        {% endif %}
+    </td>
+    <td>
+        <a href="/return_book?loan_id={{ book.loan_id }}" class="action-btn return">Return</a>
+        {% if not book.is_overdue %}
+        <a href="/renew_loan?loan_id={{ book.loan_id }}" class="action-btn renew">Renew</a>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
                 </tbody>
             </table>
         </div>

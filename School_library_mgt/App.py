@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, redirect, request, render_template, url_for
 import mysql.connector
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import io
 import csv
 from datetime import date, timedelta
@@ -16,7 +16,7 @@ db_config = {
     'password': 'Bloom123@fidey',  # Replace with your MySQL password
 =======
 
-    'password': 'precious',  # Replace with your MySQL password
+    'password': 'meshack003',  # Replace with your MySQL password
 
 
 >>>>>>> origin/main
@@ -41,6 +41,7 @@ def create_tables():
             RegistrationNumber VARCHAR(50) UNIQUE
         )
     """)
+    
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Books (
@@ -111,13 +112,45 @@ def borrowed_books():
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM borrowed_books")
-    borrowed = cursor.fetchall()
+    # Get all borrowed books
+    cursor.execute("""
+    SELECT 
+        bo.BorrowID as loan_id,
+        bo.BorrowDate as issue_date,
+        bo.ReturnDate as due_date,
+        b.Title as book_title,
+        CONCAT(s.FirstName, ' ', s.LastName) as student_name,
+        bo.Returned
+    FROM Borrowing bo
+    JOIN Students s ON bo.StudentID = s.StudentID
+    JOIN Books b ON bo.BookID = b.BookID
+""")
 
+
+    borrowed_books = cursor.fetchall()
+    
+    # Calculate statistics
+    total_borrowed = len(borrowed_books)
+    
+    # Calculate overdue books
+    today = datetime.now().date()
+    overdue_count = sum(1 for book in borrowed_books if book['due_date'] < today)
+    
+    # Calculate books due today
+    due_today = sum(1 for book in borrowed_books if book['due_date'] == today)
+    
+    # Add is_overdue flag to each book
+    for book in borrowed_books:
+         book['is_overdue'] = book['due_date'] < today
+    
     cursor.close()
     conn.close()
-    return render_template('borrowed_books.html', borrowed_books=borrowed)
-
+    
+    return render_template('borrowed_books.html', 
+                          borrowed_books=borrowed_books,
+                          total_borrowed=total_borrowed,
+                          overdue_count=overdue_count,
+                          due_today=due_today)
 @app.route('/')
 def home():
     # Get dashboard statistics
