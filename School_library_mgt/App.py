@@ -458,32 +458,17 @@ def return_view():
     # Calculate overdue days
     for book in borrowed_books:
         # Convert string dates to datetime objects
-        borrow_date = datetime.strptime(book['BorrowDate'], '%Y-%m-%d')  # Adjust format if needed
-        due_date = datetime.strptime(book['DueDate'], '%Y-%m-%d')  # Adjust format if needed
+        borrow_date = book['BorrowDate']  # Already a datetime.date object
+        due_date = book['DueDate']        # Already a datetime.date object
         
         # Calculate overdue days (if any)
-        overdue_days = (datetime.now() - due_date).days  # You can also compare with the borrow date if needed
+        overdue_days = (datetime.now().date() - due_date).days # You can also compare with the borrow date if needed
         book['overdue_days'] = overdue_days  # Add the overdue days to the book entry
 
     cursor.close()
     conn.close()
 
     return render_template('returns.html', borrowed_books=borrowed_books)
-
-
-    from datetime import date
-    cursor.execute("""
-        UPDATE borrowed_books
-        SET return_date = %s
-        WHERE id = %s
-    """, (date.today(), book_id))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return redirect(url_for('return_view'))  # Or borrowed_books view
-
 
 
 @app.route('/')
