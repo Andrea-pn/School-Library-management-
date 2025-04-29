@@ -113,10 +113,13 @@
             <div class="card-body">
                 <form action="{{ url_for('add_staff') }}" method="POST" class="row g-4" id="addStaffForm">
                     <div class="col-md-6 form-floating">
-                        <input type="text" name="name" class="form-control" placeholder="name" required>
-                        <label for="name"><i class="fas fa-user me-2"></i> Name</label>
-                    </div>                                       
-                    
+                        <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                        <label for="first_name"><i class="fas fa-user me-2"></i>First Name</label>
+                    </div>
+                    <div class="col-md-6 form-floating">
+                        <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                        <label for="last_name"><i class="fas fa-user-tag me-2"></i>Last Name</label>
+                    </div>
                     <div class="col-md-6 form-floating">
                         <input type="text" name="phone_number" class="form-control" placeholder="Phone Number">
                         <label for="phone_number"><i class="fas fa-phone me-2"></i>Phone Number</label>
@@ -174,16 +177,12 @@
 </script>
 
 <!-- Show Modal if Success -->
-{% if success_message %}
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var myModal = new bootstrap.Modal(document.getElementById('successModal'));
-        myModal.show();
-    });
+    {% if success_message %}
+    var myModal = new bootstrap.Modal(document.getElementById('successModal'));
+    myModal.show();
+    {% endif %}
 </script>
-{% endif %}
-
-
 
 </body>
 </html>
