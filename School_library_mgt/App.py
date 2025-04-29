@@ -35,6 +35,7 @@ def create_tables():
             RegistrationNumber VARCHAR(50) UNIQUE
         )
     """)
+    
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Books (
@@ -105,13 +106,46 @@ def borrowed_books():
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM borrowed_books")
-    borrowed = cursor.fetchall()
+    # Get all borrowed books
+    cursor.execute("""
+    SELECT 
+        bo.BorrowID as loan_id,
+        bo.BorrowDate as issue_date,
+        bo.ReturnDate as due_date,
+        b.Title as book_title,
+        CONCAT(s.FirstName, ' ', s.LastName) as student_name,
+        bo.Returned
+    FROM Borrowing bo
+    JOIN Students s ON bo.StudentID = s.StudentID
+    JOIN Books b ON bo.BookID = b.BookID
+""")
 
+
+
+    borrowed_books = cursor.fetchall()
+    
+    # Calculate statistics
+    total_borrowed = len(borrowed_books)
+    
+    # Calculate overdue books
+    today = datetime.now().date()
+    overdue_count = sum(1 for book in borrowed_books if book['due_date'] < today)
+    
+    # Calculate books due today
+    due_today = sum(1 for book in borrowed_books if book['due_date'] == today)
+    
+    # Add is_overdue flag to each book
+    for book in borrowed_books:
+         book['is_overdue'] = book['due_date'] < today
+    
     cursor.close()
     conn.close()
-    return render_template('borrowed_books.html', borrowed_books=borrowed)
-
+    
+    return render_template('borrowed_books.html', 
+                          borrowed_books=borrowed_books,
+                          total_borrowed=total_borrowed,
+                          overdue_count=overdue_count,
+                          due_today=due_today)
 @app.route('/')
 def home():
     # Get dashboard statistics
@@ -233,6 +267,24 @@ def add_student():
     
     return render_template('add_student.html', message=message)
 
+
+
+
+        # 3. Insert into the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+            cursor.execute("INSERT INTO Books (Title, Author, Genre, PublishedYear, Quantity) VALUES (%s, %s, %s, %s, %s)",
+                        (title, author, genre, published_year, quantity))
+            conn.commit()
+            message = "Book added successfully!"
+    except mysql.connector.Error as err:
+            message = f"Error: {err}"
+            print(f"Error: {err}")  # Debugging
+    finally:
+            cursor.close()
+            conn.close()
+
 # --- Book Routes ---
 @app.route('/books')
 def view_books():
@@ -280,7 +332,6 @@ def add_book():
             cursor.close()
             conn.close()
     return render_template('add_book.html', message=message)
-
 
 @app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -470,6 +521,7 @@ def return_simple(book_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
+
     from datetime import date
     cursor.execute("""
         UPDATE borrowed_books
@@ -504,11 +556,11 @@ def return_view():
     # Calculate overdue days
     for book in borrowed_books:
         # Convert string dates to datetime objects
-        borrow_date = datetime.strptime(book['BorrowDate'], '%Y-%m-%d')  # Adjust format if needed
-        due_date = datetime.strptime(book['DueDate'], '%Y-%m-%d')  # Adjust format if needed
+        borrow_date = book['BorrowDate']  # Already a datetime.date object
+        due_date = book['DueDate']        # Already a datetime.date object
         
         # Calculate overdue days (if any)
-        overdue_days = (datetime.now() - due_date).days  # You can also compare with the borrow date if needed
+        overdue_days = (datetime.now().date() - due_date).days # You can also compare with the borrow date if needed
         book['overdue_days'] = overdue_days  # Add the overdue days to the book entry
 
     cursor.close()
@@ -516,8 +568,6 @@ def return_view():
 
     return render_template('returns.html', borrowed_books=borrowed_books)
 
-
-  
 
 @app.route('/')
 def index():

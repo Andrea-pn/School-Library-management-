@@ -1,120 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Borrowed Books (Returns)</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        body {
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 30px;
-        }
-        .btn-return {
-            background-color: #198754;
-            color: white;
-        }
-        .btn-return:hover {
-            background-color: #157347;
-        }
-        .overdue {
-            color: red;
-        }
-        .search-bar {
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Borrowed Books (Returns)</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
+  <style>
+    body {
+      padding: 20px;
+      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.4s ease;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(to right, #1f1f1f, #343a40);
+      color: white;
+    }
+
+    .container {
+      margin-top: 30px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    body.dark-mode .container {
+      background-color: #212529;
+      color: white;
+    }
+
+    h2 {
+      color: #212529;
+      font-weight: 700;
+    }
+
+    body.dark-mode h2 {
+      color: white;
+    }
+
+    .search-bar {
+      margin-bottom: 20px;
+    }
+
+    .form-control {
+      border-radius: 25px;
+      padding-left: 20px;
+    }
+
+    .btn-return {
+      background: linear-gradient(to right, #00b09b, #96c93d);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 6px 18px;
+      font-weight: 600;
+    }
+
+    .btn-return:hover {
+      background: linear-gradient(to right, #00a18d, #89b92d);
+    }
+
+    .table th {
+      background-color: #5a2a83;
+      color: #fff;
+      text-align: center;
+    }
+
+    body.dark-mode .table th {
+      background-color: #444;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #f0f5ff;
+    }
+
+    body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #2b2b2b;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 20px;
+    }
+
+    .toast-header {
+      background-color: #20c997;
+      color: white;
+    }
+
+    .toast-body {
+      background-color: #d1e7dd;
+      font-weight: 500;
+    }
+
+    .overdue td {
+      background-color: #ffefef !important;
+    }
+
+    .alert-info {
+      background-color: #e7f5ff;
+      color: #055160;
+      font-weight: 500;
+    }
+
+    /* Animations */
+    .fade-out {
+      animation: fadeOutRow 0.5s forwards;
+    }
+
+    @keyframes fadeOutRow {
+      0% {
+        opacity: 1;
+        transform: scaleY(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scaleY(0);
+        height: 0;
+        display: none;
+      }
+    }
+
+    .toggle-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+    }
+
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <!-- Toggle Dark/Light Mode -->
+    <div class="toggle-container">
+      <div class="toggle-switch">
+        <i class="bi bi-brightness-high-fill"></i>
+        <label class="form-check-label">
+          <input type="checkbox" class="form-check-input" id="themeToggle" /> Dark Mode
+        </label>
+      </div>
+    </div>
+
+    <h2 class="text-center mb-4"><i class="bi bi-journal-bookmark-fill"></i> Borrowed Books</h2>
+
+    <!-- Search/Filter Bar -->
+    <div class="search-bar">
+      <input
+        type="text"
+        id="search"
+        class="form-control"
+        placeholder="🔍 Search by student name or book title"
+      />
+    </div>
+
+    {% if borrowed_books %}
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th><i class="bi bi-person"></i> Student</th>
+          <th><i class="bi bi-book"></i> Book</th>
+          <th><i class="bi bi-calendar-event"></i> Borrowed</th>
+          <th><i class="bi bi-clock-history"></i> Due</th>
+          <th>Status</th>
+          <th><i class="bi bi-arrow-return-left"></i> Return</th>
+        </tr>
+      </thead>
+      <tbody id="book-table-body">
+        {% for book in borrowed_books %}
+        <tr class="{{ 'overdue' if book['overdue_days'] > 0 else '' }}">
+          <td>{{ book.BorrowID }}</td>
+          <td>{{ book.StudentName }}</td>
+          <td>{{ book.BookTitle }}</td>
+          <td>{{ book.BorrowDate }}</td>
+          <td>{{ book.DueDate }}</td>
+          <td>
+            {% if book['overdue_days'] > 0 %}
+            <span class="badge bg-danger">{{ book['overdue_days'] }} days overdue</span>
+            {% else %}
+            <span class="badge bg-success">On time</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('return_simple', book_id=book.BorrowID) }}">
+              <button type="submit" class="btn btn-return btn-sm">
+                <i class="bi bi-check-circle-fill"></i> Return
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info text-center">
+      <i class="bi bi-info-circle"></i> No books are currently borrowed.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="returnToast" class="toast" role="alert">
+      <div class="toast-header">
+        <strong class="me-auto">✅ Book Returned</strong>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="toast-body">The book has been successfully returned!</div>
+    </div>
     <div class="container">
-        <h2 class="text-center mb-4">Books Currently Borrowed</h2>
-
-        <!-- Search/Filter Bar -->
-        <div class="search-bar">
-            <input type="text" id="search" class="form-control" placeholder="Search by student name or book title">
-        </div>
-        
-        {% if borrowed_books %}
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Borrow ID</th>
-                    <th>Student Name</th>
-                    <th>Book Title</th>
-                    <th>Borrow Date</th>
-                    <th>Due Date</th>
-                    <th>Days Overdue</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="book-table-body">
-                {% for book in borrowed_books %}
-                <tr class="{{ 'overdue' if book['overdue_days'] > 0 else '' }}">
-                    <td>{{ book.BorrowID }}</td>
-                    <td>{{ book.StudentName }}</td>
-                    <td>{{ book.BookTitle }}</td>
-                    <td>{{ book.BorrowDate }}</td>
-                    <td class="{{ 'overdue' if book['overdue_days'] > 0 else '' }}">{{ book.DueDate }}</td>
-                    <td class="{{ 'overdue' if book['overdue_days'] > 0 else '' }}">
-                        {% if book['overdue_days'] > 0 %}
-                            {{ book['overdue_days'] }} days
-                        {% else %}
-                            On time
-                        {% endif %}
-                    </td>
-                    <td>
-                        <form method="POST" action="{{ url_for('return_simple', book_id=book.BorrowID) }}">
-                            <button type="submit" class="btn btn-return btn-sm">Return</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <div class="alert alert-info text-center">
-                No books are currently borrowed.
-            </div>
-        {% endif %}
+      <!-- Toggle, heading, search, table, etc... -->
+    
+      <a href="/" class="btn btn-outline-primary back-link mt-3">
+        <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+      </a>
     </div>
+    
+  
+  </div>
 
-    <!-- Toast message after return -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="returnToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Book Returned</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                The book has been successfully returned.
-            </div>
-        </div>
-    </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Search filter
+    document.getElementById('search').addEventListener('input', function (e) {
+      let searchText = e.target.value.toLowerCase();
+      document.querySelectorAll('#book-table-body tr').forEach((row) => {
+        let student = row.cells[1].textContent.toLowerCase();
+        let title = row.cells[2].textContent.toLowerCase();
+        row.style.display = student.includes(searchText) || title.includes(searchText) ? '' : 'none';
+      });
+    });
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Search functionality
-        document.getElementById('search').addEventListener('input', function(e) {
-            let searchText = e.target.value.toLowerCase();
-            let rows = document.querySelectorAll('#book-table-body tr');
-            rows.forEach(function(row) {
-                let studentName = row.cells[1].textContent.toLowerCase();
-                let bookTitle = row.cells[2].textContent.toLowerCase();
-                if (studentName.includes(searchText) || bookTitle.includes(searchText)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
+    // Toast on submit + animation
+    document.querySelectorAll('form').forEach((form) => {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const row = form.closest('tr');
+        row.classList.add('fade-out');
+        setTimeout(() => {
+          row.remove();
+          let toast = new bootstrap.Toast(document.getElementById('returnToast'));
+          toast.show();
+          form.submit(); // You can remove this line if you don't want to reload/redirect.
+        }, 500);
+      });
+    });
 
-        // Show toast after book return (you may trigger this toast in the backend after a return action)
-        document.querySelector('form').addEventListener('submit', function() {
-            let toast = new bootstrap.Toast(document.getElementById('returnToast'));
-            toast.show();
-        });
-    </script>
+    // Dark mode toggle
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('change', function () {
+      document.body.classList.toggle('dark-mode', this.checked);
+    });
+  </script>
 </body>
 </html>
