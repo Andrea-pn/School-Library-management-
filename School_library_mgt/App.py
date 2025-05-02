@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, redirect, request, render_template, url_for
 import mysql.connector
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import io
 import csv
+from datetime import datetime
 from datetime import date, timedelta
 from flask import make_response, request, jsonify, flash, redirect, url_for
 
@@ -13,7 +14,13 @@ db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
 
-    'password': 'precious',  # Replace with your MySQL password
+    'password': '343434',  # Replace with your MySQL password
+
+    'password': 'Bloom123@fidey',  # Replace with your MySQL password
+
+
+    'password': 'meshack003',  # Replace with your MySQL password
+
 
 
     'database': 'SchoolLibrary'
@@ -37,6 +44,7 @@ def create_tables():
             RegistrationNumber VARCHAR(50) UNIQUE
         )
     """)
+    
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Books (
@@ -107,13 +115,46 @@ def borrowed_books():
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM borrowed_books")
-    borrowed = cursor.fetchall()
+    # Get all borrowed books
+    cursor.execute("""
+    SELECT 
+        bo.BorrowID as loan_id,
+        bo.BorrowDate as issue_date,
+        bo.ReturnDate as due_date,
+        b.Title as book_title,
+        CONCAT(s.FirstName, ' ', s.LastName) as student_name,
+        bo.Returned
+    FROM Borrowing bo
+    JOIN Students s ON bo.StudentID = s.StudentID
+    JOIN Books b ON bo.BookID = b.BookID
+""")
 
+
+
+    borrowed_books = cursor.fetchall()
+    
+    # Calculate statistics
+    total_borrowed = len(borrowed_books)
+    
+    # Calculate overdue books
+    today = datetime.now().date()
+    overdue_count = sum(1 for book in borrowed_books if book['due_date'] < today)
+    
+    # Calculate books due today
+    due_today = sum(1 for book in borrowed_books if book['due_date'] == today)
+    
+    # Add is_overdue flag to each book
+    for book in borrowed_books:
+         book['is_overdue'] = book['due_date'] < today
+    
     cursor.close()
     conn.close()
-    return render_template('borrowed_books.html', borrowed_books=borrowed)
-
+    
+    return render_template('borrowed_books.html', 
+                          borrowed_books=borrowed_books,
+                          total_borrowed=total_borrowed,
+                          overdue_count=overdue_count,
+                          due_today=due_today)
 @app.route('/')
 def home():
     # Get dashboard statistics
@@ -235,53 +276,23 @@ def add_student():
     
     return render_template('add_student.html', message=message)
 
-# --- Book Routes ---
-@app.route('/books')
-def view_books():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Books")
-    books = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('view_books.html', books=books)
 
-@app.route('/add_book', methods=['GET', 'POST'])
-def add_book():
-    message = ""
-    if request.method == 'POST':
-        # 1. Get form data
-        title = request.form['title']
-        author = request.form['author']
-        genre = request.form['genre']
-        published_year = request.form['published_year']
-        quantity = request.form['quantity']
 
-        print(f"Title: {title}, Author: {author}, Genre: {genre}, Published Year: {published_year}, Quantity: {quantity}")  # Debugging
-
-        # 2. Validate year and quantity as integers
-        try:
-            published_year = int(published_year)
-            quantity = int(quantity)
-        except ValueError:
-            message = "Year and Quantity must be valid numbers."
-            return render_template('add_book.html', message=message)
 
         # 3. Insert into the database
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        try:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
             cursor.execute("INSERT INTO Books (Title, Author, Genre, PublishedYear, Quantity) VALUES (%s, %s, %s, %s, %s)",
                         (title, author, genre, published_year, quantity))
             conn.commit()
             message = "Book added successfully!"
-        except mysql.connector.Error as err:
+    except mysql.connector.Error as err:
             message = f"Error: {err}"
             print(f"Error: {err}")  # Debugging
-        finally:
+    finally:
             cursor.close()
             conn.close()
-    return render_template('add_book.html', message=message)
 
 @app.route('/borrow_book', methods=['GET', 'POST'])
 def borrow_book():
@@ -412,6 +423,7 @@ def return_simple(book_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
+
     from datetime import date
     cursor.execute("""
         UPDATE borrowed_books
@@ -446,11 +458,11 @@ def return_view():
     # Calculate overdue days
     for book in borrowed_books:
         # Convert string dates to datetime objects
-        borrow_date = datetime.strptime(book['BorrowDate'], '%Y-%m-%d')  # Adjust format if needed
-        due_date = datetime.strptime(book['DueDate'], '%Y-%m-%d')  # Adjust format if needed
+        borrow_date = book['BorrowDate']  # Already a datetime.date object
+        due_date = book['DueDate']        # Already a datetime.date object
         
         # Calculate overdue days (if any)
-        overdue_days = (datetime.now() - due_date).days  # You can also compare with the borrow date if needed
+        overdue_days = (datetime.now().date() - due_date).days # You can also compare with the borrow date if needed
         book['overdue_days'] = overdue_days  # Add the overdue days to the book entry
 
     cursor.close()
@@ -458,8 +470,6 @@ def return_view():
 
     return render_template('returns.html', borrowed_books=borrowed_books)
 
-
-  
 
 @app.route('/')
 def index():
@@ -1015,6 +1025,7 @@ def export_csv():
         # If error, return to reports page with error message
         flash(f"Error exporting data: {str(e)}", "error")
         return redirect(url_for('reports'))
+
     
 @app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -1074,6 +1085,7 @@ def delete_book(book_id):
     cursor.close()
     conn.close()
     return render_template('delete_book.html', book=book)
+
 
 
 if __name__ == '__main__':
