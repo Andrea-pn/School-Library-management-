@@ -14,16 +14,9 @@ db_config = {
     'host': 'localhost',
     'user': 'root',  # Replace with your MySQL username
 
-    'password': '343434',  # Replace with your MySQL password
-
     'password': 'Bloom123@fidey',  # Replace with your MySQL password
 
-
-    'password': 'meshack003',  # Replace with your MySQL password
-
-
-
-    'database': 'SchoolLibrary'
+    'database': 'Schoollibrary'
 }
 
 # Function to get a connection to the database
